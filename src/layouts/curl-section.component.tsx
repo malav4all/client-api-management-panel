@@ -1,6 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const CurlSection: React.FC = () => {
+  const apiKey = useSelector((state: any) => state.auth.user?.apiKey || '');
+  const [authType, setAuthType] = useState('apikey');
+  const [token, setToken] = useState(apiKey);
+
+  const handleAuthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newAuthType = e.target.value;
+    setAuthType(newAuthType);
+
+    // Set the default token or key based on the selected auth type
+    if (newAuthType === 'apikey') {
+      setToken(apiKey);
+    } else if (newAuthType === 'bearer') {
+      setToken(''); // Clear the token for bearer auth
+    }
+  };
+
   return (
     <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6">
       {/* Language Tabs */}
@@ -24,12 +41,19 @@ const CurlSection: React.FC = () => {
         <label className="mb-2 block text-sm font-medium text-gray-700">
           Authentication
         </label>
-        <select className="w-full rounded-md border p-2">
-          <option value="Bearer">Bearer</option>
+        <select
+          value={authType}
+          onChange={handleAuthChange}
+          className="w-full rounded-md border p-2"
+        >
+          <option value="apikey">API Key</option>
+          <option value="bearer">Bearer</option>
         </select>
         <input
           type="text"
-          placeholder="token"
+          value={token}
+          onChange={(e) => setToken(e.target.value)}
+          placeholder={authType === 'apikey' ? 'x-api-key' : 'Bearer token'}
           className="mt-2 w-full rounded-md border p-2 focus:ring focus:ring-blue-200"
         />
       </div>
@@ -40,8 +64,10 @@ const CurlSection: React.FC = () => {
         <div className="rounded-lg bg-gray-900 p-4 text-sm text-white">
           <pre>
             {`curl --request GET \\
---url https://app.asana.com/api/1.0/tasks/task_gid \\
---header 'accept: application/json'`}
+--url http://localhost:3000/gateway/ \\
+--header 'accept: application/json' \\
+--header '${authType === 'apikey' ? `x-api-key: ${token}` : `Authorization: Bearer ${token}`}'
+`}
           </pre>
         </div>
         <button className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
