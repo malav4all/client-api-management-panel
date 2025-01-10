@@ -37,6 +37,10 @@ const Login: React.FC = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login failed:', err.message);
+      toast.error(`${err.message}`, {
+        position: 'bottom-right',
+        autoClose: 3000, // Closes automatically after 3 seconds
+      });
       // setError(err.message || 'An error occurred while logging in.');
     }
   };

@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { clearAuthData } from '../store/slices/authSlice';
 
 const Header: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
   const handleLogout = () => {
-    // Implement logout functionality
-    console.log('Logout clicked');
+    // Clear Redux store
+    dispatch(clearAuthData());
+
+    // Redirect to login page
+    navigate('/');
   };
 
   const handleChangePassword = () => {
