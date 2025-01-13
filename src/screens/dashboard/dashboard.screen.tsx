@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../layouts/sidebar.component';
 import MainContent from '../../layouts/main-content.component';
 import CurlSection from '../../layouts/curl-section.component';
@@ -10,7 +10,7 @@ const Dashboard: React.FC = () => {
   const [payload, setPayload] = useState<any>({});
 
   // Update the payload when the selected endpoint changes
-  React.useEffect(() => {
+  useEffect(() => {
     setPayload(selectedEndpoint?.payload || {});
   }, [selectedEndpoint]);
 
