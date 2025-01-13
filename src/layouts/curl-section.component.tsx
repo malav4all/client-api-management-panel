@@ -12,6 +12,7 @@ const CurlSection: React.FC<CurlSectionProps> = ({
 }) => {
   const apiKey = useSelector((state: any) => state.auth.user?.apiKey || '');
   const [authType, setAuthType] = useState('apikey');
+  const [response, setResponse] = useState<string | null>(null);
   const [token, setToken] = useState(apiKey);
 
   const mapAccessTypeToMethod = (accessType: string) => {
@@ -38,6 +39,45 @@ const CurlSection: React.FC<CurlSectionProps> = ({
       setToken(apiKey);
     } else if (newAuthType === 'bearer') {
       setToken(''); // Clear the token for bearer auth
+    }
+  };
+  const handleTryIt = async () => {
+    try {
+      const headers: any = {
+        Accept: 'application/json',
+      };
+
+      if (authType === 'apikey') {
+        headers['x-api-key'] = token;
+      } else {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      let url = `http://localhost:3000/gateway/${selectedEndpoint.name}`;
+      const options: any = {
+        method: httpMethod,
+        headers,
+      };
+
+      if (httpMethod === 'GET') {
+        const queryParams = new URLSearchParams({
+          page: payload.page,
+          limit: payload.limit,
+        });
+        url = `${url}?${queryParams}`;
+      }
+
+      if (httpMethod !== 'GET' && payload) {
+        options.body = JSON.stringify(payload);
+        headers['Content-Type'] = 'application/json';
+      }
+
+      // const url = `http://localhost:3000/gateway/${selectedEndpoint.name}`;
+      const res = await fetch(url, options);
+
+      const result = await res.json();
+      setResponse(JSON.stringify(result, null, 2));
+    } catch (error: any) {
+      setResponse(`Error: ${error.message}`);
     }
   };
 
@@ -112,7 +152,10 @@ const CurlSection: React.FC<CurlSectionProps> = ({
 `}
           </pre>
         </div>
-        <button className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600">
+        <button
+          onClick={handleTryIt}
+          className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        >
           Try It!
         </button>
       </div>
@@ -120,6 +163,17 @@ const CurlSection: React.FC<CurlSectionProps> = ({
       {/* Response Section */}
       {/* Response Section */}
       {/* Response Section */}
+      <div className="mt-4">
+        <h3 className="mb-2 text-sm font-semibold text-gray-800">Response</h3>
+        <div className="rounded-lg bg-gray-100 p-4 text-sm text-gray-800">
+          {response ? (
+            <pre>{response}</pre>
+          ) : (
+            <p>Click "Try It!" to see the response here.</p>
+          )}
+        </div>
+      </div>
+
       <div className="mt-4">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-800">Response</h3>
