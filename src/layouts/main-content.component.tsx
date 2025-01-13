@@ -61,21 +61,26 @@ const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
       <section className="mb-6">
         <h2 className="text-lg font-semibold text-gray-800">Response Codes</h2>
         <div className="mt-2 space-y-4 rounded-lg border border-gray-300 p-4">
-          {selectedEndpoint?.responseCodes?.map((response: any, index: any) => (
-            <div key={index} className="flex items-center space-x-3">
-              <span
-                className={`h-4 w-4 rounded-full ${
-                  response.code === 200
-                    ? 'bg-green-500'
-                    : response.code >= 400
-                      ? 'bg-red-500'
-                      : 'bg-gray-500'
-                }`}
-              ></span>
-              <p className="font-semibold text-gray-700">{response.code}</p>
-              <p className="text-sm text-gray-600">{response.description}</p>
-            </div>
-          ))}
+          {selectedEndpoint?.responseCodes &&
+            selectedEndpoint?.responseCodes?.map(
+              (response: any, index: any) => (
+                <div key={index} className="flex items-center space-x-3">
+                  <span
+                    className={`h-4 w-4 rounded-full ${
+                      response.code === 200
+                        ? 'bg-green-500'
+                        : response.code >= 400
+                          ? 'bg-red-500'
+                          : 'bg-gray-500'
+                    }`}
+                  ></span>
+                  <p className="font-semibold text-gray-700">{response.code}</p>
+                  <p className="text-sm text-gray-600">
+                    {response.description}
+                  </p>
+                </div>
+              )
+            )}
         </div>
       </section>
     </div>

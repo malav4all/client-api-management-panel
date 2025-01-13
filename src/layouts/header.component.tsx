@@ -6,6 +6,7 @@ import Modal from '../global-component/modal/modal.global.component';
 import { patchRequest } from '../core-services/rest-api/apiHelpers';
 import { store } from '../store';
 import { toast } from 'react-toastify';
+import UserInfoModal from '../global-component/modal/user-modal.global.component';
 
 const Header: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -15,6 +16,7 @@ const Header: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -60,11 +62,6 @@ const Header: React.FC = () => {
 
     // Redirect to login page
     navigate('/');
-  };
-
-  const handleChangePassword = () => {
-    // Implement change password functionality
-    console.log('Change Password clicked');
   };
 
   return (
@@ -174,7 +171,10 @@ const Header: React.FC = () => {
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
                 <button
-                  onClick={handleChangePassword}
+                  onClick={() => {
+                    setIsUserModalOpen(true);
+                    setIsDropdownOpen(false);
+                  }}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Profile
@@ -197,6 +197,11 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      <UserInfoModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        user={store.getState().auth.user ?? {}}
+      />
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
