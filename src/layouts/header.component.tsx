@@ -1,12 +1,54 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearAuthData } from '../store/slices/authSlice';
+import Modal from '../global-component/modal/modal.global.component';
+import { patchRequest } from '../core-services/rest-api/apiHelpers';
+import { store } from '../store';
+import { toast } from 'react-toastify';
 
 const Header: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const userName = useSelector((state: any) => state.auth.user?.name || 'User');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    setIsDropdownOpen(false);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setOldPassword('');
+    setNewPassword('');
+  };
+
+  const changePasswordRequest = async () => {
+    try {
+      const response = await patchRequest(
+        `clientChangePassword/${store.getState().auth.user?._id}`,
+        {
+          oldPassword,
+          newPassword,
+        }
+      );
+      await handleCloseModal();
+      setIsDropdownOpen(false);
+      toast.success(`${response?.message}`, {
+        position: 'bottom-right',
+        autoClose: 3000, // Closes automatically after 3 seconds
+      });
+      return response;
+    } catch (error: any) {
+      throw new Error(
+        error.response?.data?.message || 'Failed to update password'
+      );
+    }
+  };
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -124,6 +166,9 @@ const Header: React.FC = () => {
                 alt="Profile"
                 className="h-8 w-8 rounded-full border border-gray-300"
               />
+              <span className="text-sm font-medium text-gray-800">
+                {userName}
+              </span>
             </button>
 
             {isDropdownOpen && (
@@ -135,11 +180,12 @@ const Header: React.FC = () => {
                   Profile
                 </button>
                 <button
-                  onClick={handleChangePassword}
+                  onClick={handleOpenModal}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
                 >
                   Change Password
                 </button>
+
                 <button
                   onClick={handleLogout}
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
@@ -151,6 +197,60 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Change Password"
+        footer={
+          <div className="flex justify-end space-x-2">
+            <button
+              onClick={handleCloseModal}
+              className="rounded-md bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={changePasswordRequest}
+              className="rounded-md bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
+            >
+              Change Password
+            </button>
+          </div>
+        }
+      >
+        <div>
+          <div className="mb-4">
+            <label
+              htmlFor="oldPassword"
+              className="block text-sm text-gray-600"
+            >
+              Current Password
+            </label>
+            <input
+              id="oldPassword"
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full rounded-md border px-4 py-2 text-sm focus:outline-none focus:ring focus:ring-gray-300"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="newPassword"
+              className="block text-sm text-gray-600"
+            >
+              New Password
+            </label>
+            <input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full rounded-md border px-4 py-2 text-sm focus:outline-none focus:ring focus:ring-gray-300"
+            />
+          </div>
+        </div>
+      </Modal>
     </header>
   );
 };

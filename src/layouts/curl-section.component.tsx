@@ -1,10 +1,33 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-const CurlSection: React.FC = () => {
+interface CurlSectionProps {
+  selectedEndpoint: any; // Pass the selected endpoint from the parent component
+  payload: any; // Pass the updated payload from the parent
+}
+
+const CurlSection: React.FC<CurlSectionProps> = ({
+  selectedEndpoint,
+  payload,
+}) => {
   const apiKey = useSelector((state: any) => state.auth.user?.apiKey || '');
   const [authType, setAuthType] = useState('apikey');
   const [token, setToken] = useState(apiKey);
+
+  const mapAccessTypeToMethod = (accessType: string) => {
+    switch (accessType) {
+      case 'read':
+        return 'GET';
+      case 'write':
+        return 'POST';
+      case 'delete':
+        return 'DELETE';
+      default:
+        return 'GET';
+    }
+  };
+
+  const httpMethod = mapAccessTypeToMethod(selectedEndpoint?.accessType);
 
   const handleAuthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newAuthType = e.target.value;
@@ -18,15 +41,25 @@ const CurlSection: React.FC = () => {
     }
   };
 
+  if (!selectedEndpoint) {
+    return (
+      <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6">
+        <p className="text-gray-600">
+          Select an endpoint to view the cURL command.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6">
       {/* Language Tabs */}
       <div className="mb-4 flex space-x-4">
-        {['Shell', 'Node', 'Ruby', 'PHP', 'Python'].map((lang, index) => (
+        {['Node', 'Ruby', 'PHP', 'Python'].map((lang, index) => (
           <button
             key={index}
             className={`rounded px-4 py-2 ${
-              lang === 'Shell'
+              lang === 'Node'
                 ? 'bg-blue-100 text-blue-600'
                 : 'text-gray-600 hover:text-blue-600'
             }`}
@@ -59,14 +92,23 @@ const CurlSection: React.FC = () => {
       </div>
 
       {/* CURL Request */}
-      <div className="mb-4">
+      <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6">
         <h3 className="mb-2 text-sm font-semibold text-gray-800">CURL</h3>
         <div className="rounded-lg bg-gray-900 p-4 text-sm text-white">
           <pre>
-            {`curl --request GET \\
---url http://localhost:3000/gateway/ \\
+            {`curl --request ${httpMethod} \\
+--url http://localhost:3000/gateway/${selectedEndpoint.name} \\
 --header 'accept: application/json' \\
---header '${authType === 'apikey' ? `x-api-key: ${token}` : `Authorization: Bearer ${token}`}'
+--header '${
+              authType === 'apikey'
+                ? `x-api-key: ${token}`
+                : `Authorization: Bearer ${token}`
+            }'${
+              payload
+                ? ` \\
+--data '${JSON.stringify(payload, null, 2)}'`
+                : ''
+            }
 `}
           </pre>
         </div>
@@ -76,33 +118,48 @@ const CurlSection: React.FC = () => {
       </div>
 
       {/* Response Section */}
+      {/* Response Section */}
+      {/* Response Section */}
       <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-800">Response</h3>
           <select className="rounded-md border p-2">
             <option value="application/json">application/json</option>
           </select>
         </div>
         <div className="rounded-lg bg-gray-100 p-4 text-sm">
-          <p className="text-gray-600">
+          <p className="mb-4 text-gray-600">
             Click <strong>Try It!</strong> to start a request and see the
             response here!
           </p>
-          <p className="mt-2 text-gray-600">Or choose an example:</p>
-          <div className="mt-2 flex items-center space-x-4">
-            {[
-              { code: '200', color: 'bg-green-500' },
-              { code: '400', color: 'bg-red-500' },
-              { code: '401', color: 'bg-red-500' },
-              { code: '403', color: 'bg-red-500' },
-              { code: '404', color: 'bg-red-500' },
-              { code: '500', color: 'bg-red-500' },
-            ].map((status, index) => (
-              <div key={index} className="flex items-center space-x-1">
-                <span className={`h-3 w-3 rounded-full ${status.color}`}></span>
-                <span className="text-sm text-gray-700">{status.code}</span>
-              </div>
-            ))}
+          <p className="mb-2 font-semibold text-gray-800">Response codes:</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {selectedEndpoint.responseCodes.map(
+              (response: any, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-4 rounded-md bg-white p-4 shadow-sm"
+                >
+                  <span
+                    className={`h-5 w-5 rounded-full ${
+                      response.code === 200
+                        ? 'bg-green-500'
+                        : response.code >= 400
+                          ? 'bg-red-500'
+                          : 'bg-gray-500'
+                    }`}
+                  ></span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {response.code}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {response.description}
+                    </p>
+                  </div>
+                </div>
+              )
+            )}
           </div>
         </div>
       </div>

@@ -1,100 +1,81 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-const MainContent: React.FC = () => {
+interface MainContentProps {
+  selectedEndpoint: any;
+  setPayload: (payload: any) => void; // Callback to update payload in the parent
+}
+
+const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
+  const [payload, setLocalPayload] = useState<any>(
+    selectedEndpoint?.payload || {}
+  );
+
+  // Update local payload whenever the selected endpoint changes
+  useEffect(() => {
+    setLocalPayload(selectedEndpoint?.payload || {});
+  }, [selectedEndpoint]);
+
+  // Handle changes in payload fields
+  const handlePayloadChange = (key: string, value: string) => {
+    const updatedPayload = { ...payload, [key]: value };
+    setLocalPayload(updatedPayload);
+    setPayload(updatedPayload); // Update parent state
+  };
+
   return (
     <div className="w-full p-6">
-      {/* Title and Endpoint */}
+      {/* Title and Description */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Get a Task</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Returns the complete task record for a single task.
-        </p>
-        <div className="mt-2 flex items-center space-x-2">
-          <span className="rounded-md bg-green-100 px-2 py-1 text-xs font-bold text-green-700">
-            GET
-          </span>
-          <p className="rounded bg-gray-50 p-2 font-mono text-sm text-blue-600">
-            https://app.asana.com/api/1.0/tasks/{`{task_gid}`}
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {selectedEndpoint?.name}
+        </h1>
       </div>
 
-      {/* Path Parameters */}
+      {/* Payload */}
       <section className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Path Params</h2>
-        <div className="mt-2 rounded-lg border border-gray-300 p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-semibold text-gray-700">
-                task_gid <span className="text-red-500">required</span>
-              </p>
-              <p className="text-sm text-gray-600">The task to operate on.</p>
-            </div>
-            <input
-              type="text"
-              placeholder="321654"
-              className="w-32 rounded-md border border-red-300 p-2 focus:outline-none focus:ring focus:ring-red-300"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Query Parameters */}
-      <section className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Query Params</h2>
-        <div className="mt-2 space-y-4 rounded-lg border border-gray-300 p-4">
-          <div>
-            <p className="font-semibold text-gray-700">
-              opt_pretty <span className="text-gray-500">(boolean)</span>
+        <h2 className="text-lg font-semibold text-gray-800">Payload</h2>
+        <div className="rounded-md bg-gray-100 p-4 text-sm text-gray-800">
+          {Object.keys(payload).length > 0 ? (
+            Object.entries(payload).map(([key, value]) => (
+              <div key={key} className="mb-4 flex items-center">
+                <label className="mr-4 w-24 font-medium text-gray-700">
+                  {key}:
+                </label>
+                <input
+                  type="text"
+                  value={value as any}
+                  onChange={(e) => handlePayloadChange(key, e.target.value)}
+                  className="w-full rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-600">
+              No payload available for this endpoint.
             </p>
-            <p className="text-sm text-gray-600">
-              Provides "pretty" output. This will take extra time and increase
-              the response size, so it is advisable only to use this during
-              debugging.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700">
-              opt_fields{' '}
-              <span className="text-gray-500">(array of strings)</span>
-            </p>
-            <p className="text-sm text-gray-600">
-              Defines fields to return. Some requests return compact
-              representations of objects in order to conserve resources and
-              complete the request more efficiently.
-            </p>
-            <button className="mt-2 rounded-md border border-blue-500 px-4 py-2 text-sm text-blue-500 hover:bg-blue-100">
-              Add String
-            </button>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Responses */}
       <section className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Responses</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Response Codes</h2>
         <div className="mt-2 space-y-4 rounded-lg border border-gray-300 p-4">
-          <div className="flex items-center space-x-3">
-            <span className="h-4 w-4 rounded-full bg-green-500"></span>
-            <p className="font-semibold text-gray-700">200</p>
-            <p className="text-sm text-gray-600">
-              Successfully retrieved the specified task.
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="h-4 w-4 rounded-full bg-red-500"></span>
-            <p className="font-semibold text-gray-700">400</p>
-            <p className="text-sm text-gray-600">
-              This usually occurs because of a missing or malformed parameter.
-            </p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="h-4 w-4 rounded-full bg-red-500"></span>
-            <p className="font-semibold text-gray-700">401</p>
-            <p className="text-sm text-gray-600">
-              A valid authentication token was not provided.
-            </p>
-          </div>
+          {selectedEndpoint?.responseCodes?.map((response: any, index: any) => (
+            <div key={index} className="flex items-center space-x-3">
+              <span
+                className={`h-4 w-4 rounded-full ${
+                  response.code === 200
+                    ? 'bg-green-500'
+                    : response.code >= 400
+                      ? 'bg-red-500'
+                      : 'bg-gray-500'
+                }`}
+              ></span>
+              <p className="font-semibold text-gray-700">{response.code}</p>
+              <p className="text-sm text-gray-600">{response.description}</p>
+            </div>
+          ))}
         </div>
       </section>
     </div>
