@@ -15,14 +15,18 @@ const Dashboard: React.FC = () => {
   }, [selectedEndpoint]);
 
   return (
-    <div className="flex h-screen flex-col bg-gray-50">
-      {/* Header Section */}
+    <div className="flex flex-col bg-gray-50">
+      {/* Header */}
       <Header />
 
       {/* Main Content Area */}
-      <div className="flex flex-grow overflow-hidden">
+      {/* 
+        1. Use flex-col on small screens, switching to flex-row on md screens.
+        2. Remove per-section scroll (overflow-y-auto) unless you really need it on small screens.
+      */}
+      <div className="flex flex-col md:flex-row">
         {/* Sidebar */}
-        <div className="min-w-[250px] border-r bg-white">
+        <div className="border-r bg-white md:w-[250px]">
           <Sidebar
             permissionMatrix={store.getState().auth.user?.permissionMatrix}
             setSelectedEndpoint={setSelectedEndpoint}
@@ -38,7 +42,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Curl Section */}
-        <div className="w-1/3 min-w-[350px] border-l bg-gray-50">
+        <div className="border-l bg-gray-50 md:max-h-screen md:w-1/3 md:min-w-[350px] md:overflow-y-auto">
           <CurlSection selectedEndpoint={selectedEndpoint} payload={payload} />
         </div>
       </div>

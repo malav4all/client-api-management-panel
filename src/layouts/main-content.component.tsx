@@ -22,8 +22,18 @@ const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
     setPayload(updatedPayload); // Update parent state
   };
 
+  if (!selectedEndpoint) {
+    return (
+      <div className="min-h-screen w-full p-4 sm:p-6">
+        <p className="text-gray-600">
+          Please select an endpoint to see its details.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen w-full p-4">
+    <div className="min-h-screen w-full p-4 sm:p-6">
       {/* Title and Description */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
@@ -37,8 +47,11 @@ const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
         <div className="rounded-md bg-gray-100 p-4 text-sm text-gray-800">
           {Object.keys(payload).length > 0 ? (
             Object.entries(payload).map(([key, value]) => (
-              <div key={key} className="mb-4 flex items-center">
-                <label className="mr-4 w-24 font-medium text-gray-700">
+              <div
+                key={key}
+                className="mb-4 flex flex-col sm:flex-row sm:items-center"
+              >
+                <label className="mb-1 block font-medium text-gray-700 sm:mb-0 sm:mr-4 sm:w-24">
                   {key}:
                 </label>
                 <input
@@ -64,9 +77,12 @@ const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
           {selectedEndpoint?.responseCodes &&
             selectedEndpoint?.responseCodes?.map(
               (response: any, index: any) => (
-                <div key={index} className="flex items-center space-x-3">
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row sm:items-center sm:space-x-3"
+                >
                   <span
-                    className={`h-4 w-4 rounded-full ${
+                    className={`mb-2 h-4 w-4 rounded-full sm:mb-0 ${
                       response.code === 200
                         ? 'bg-green-500'
                         : response.code >= 400
