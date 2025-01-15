@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface MainContentProps {
   selectedEndpoint: any;
@@ -23,7 +23,7 @@ const MainContent = ({ selectedEndpoint, setPayload }: MainContentProps) => {
   };
 
   return (
-    <div className="w-full p-6">
+    <div className="h-screen w-full p-4">
       {/* Title and Description */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">

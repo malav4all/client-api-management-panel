@@ -16,17 +16,31 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex h-screen flex-col bg-gray-50">
+      {/* Header Section */}
       <Header />
-      <div className="flex flex-grow">
-        <Sidebar
-          permissionMatrix={store.getState().auth.user?.permissionMatrix}
-          setSelectedEndpoint={setSelectedEndpoint}
-        />
-        <MainContent
-          selectedEndpoint={selectedEndpoint}
-          setPayload={setPayload}
-        />
-        <CurlSection selectedEndpoint={selectedEndpoint} payload={payload} />
+
+      {/* Main Content Area */}
+      <div className="flex flex-grow overflow-hidden">
+        {/* Sidebar */}
+        <div className="min-w-[250px] border-r bg-white">
+          <Sidebar
+            permissionMatrix={store.getState().auth.user?.permissionMatrix}
+            setSelectedEndpoint={setSelectedEndpoint}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-grow bg-gray-100 p-4">
+          <MainContent
+            selectedEndpoint={selectedEndpoint}
+            setPayload={setPayload}
+          />
+        </div>
+
+        {/* Curl Section */}
+        <div className="w-1/3 min-w-[350px] border-l bg-gray-50">
+          <CurlSection selectedEndpoint={selectedEndpoint} payload={payload} />
+        </div>
       </div>
     </div>
   );
